@@ -11,43 +11,43 @@ import Kingfisher
 
 class DGCAnimationVapPlayer: NSObject, DGCAnimationPlayerProtocol {
     
-    var containView: UIView { vapPlayerView }
+    var containView: UIView { dgc_vapPlayerView }
     weak var delegate: DGCAnimationPlayerDelegate?
     
-    private lazy var vapPlayerView = DGCAnimationVapPlayerView()
+    private lazy var dgc_vapPlayerView = DGCAnimationVapPlayerView()
     // 融合信息
-    private var dynamicContentMapByTag: [String: String] = [:]
+    private var dgc_dynamicContentMapByTag: [String: String] = [:]
     
     func play(url: String, config: DGCAnimationConfig?) {
-        dynamicContentMapByTag.removeAll()
+        dgc_dynamicContentMapByTag.removeAll()
         // 设置动态参数
-        var resolvedRepeatCount: Int32 = 1
-        if let playConfig = config {
-            playConfig.keyData.forEach { keyItem in
-                dynamicContentMapByTag[keyItem.key] = keyItem.data
+        var dgc_resolvedRepeatCount: Int32 = 1
+        if let dgc_playConfig = config {
+            dgc_playConfig.keyData.forEach { keyItem in
+                dgc_dynamicContentMapByTag[keyItem.key] = keyItem.data
             }
-            resolvedRepeatCount = playConfig.playCount <= 0 ? -1 : playConfig.playCount
+            dgc_resolvedRepeatCount = dgc_playConfig.playCount <= 0 ? -1 : dgc_playConfig.playCount
             
-            var resolvedContentMode: QGVAPWrapViewContentMode = .aspectFit
-            switch playConfig.contentMode {
-            case .scaleAspectFit:resolvedContentMode = .aspectFit
-            case .scaleAspectFill: resolvedContentMode = .aspectFill
-            case .scaleToFill: resolvedContentMode = .scaleToFill
-            default:resolvedContentMode = .aspectFit}
-            vapPlayerView.setMute(playConfig.isMute)
-            vapPlayerView.contentMode = resolvedContentMode
-            vapPlayerView.autoDestoryAfterFinish = playConfig.isSaveLastFrame
+            var dgc_resolvedContentMode: QGVAPWrapViewContentMode = .aspectFit
+            switch dgc_playConfig.contentMode {
+            case .scaleAspectFit:dgc_resolvedContentMode = .aspectFit
+            case .scaleAspectFill: dgc_resolvedContentMode = .aspectFill
+            case .scaleToFill: dgc_resolvedContentMode = .scaleToFill
+            default:dgc_resolvedContentMode = .aspectFit}
+            dgc_vapPlayerView.setMute(dgc_playConfig.isMute)
+            dgc_vapPlayerView.contentMode = dgc_resolvedContentMode
+            dgc_vapPlayerView.autoDestoryAfterFinish = dgc_playConfig.isSaveLastFrame
         }
         //进入后台继续播放
-        vapPlayerView.hwd_enterBackgroundOP = .doNothing
-        let normalizedLocalFilePath = url.replacingOccurrences(of: "file://", with: "") // 必须去除前缀
+        dgc_vapPlayerView.hwd_enterBackgroundOP = .doNothing
+        let dgc_normalizedLocalFilePath = url.replacingOccurrences(of: "file://", with: "") // 必须去除前缀
         
-        vapPlayerView.playHWDMP4(normalizedLocalFilePath, repeatCount: Int(resolvedRepeatCount), delegate: self)
+        dgc_vapPlayerView.playHWDMP4(dgc_normalizedLocalFilePath, repeatCount: Int(dgc_resolvedRepeatCount), delegate: self)
         
     }
     
     func stop() {
-        vapPlayerView.stopHWDMP4()
+        dgc_vapPlayerView.stopHWDMP4()
     }
     
     deinit {
@@ -70,28 +70,28 @@ extension DGCAnimationVapPlayer: VAPWrapViewDelegate{
     }
 
     func vapWrapview_content(forVapTag tag: String, resource _: QGVAPSourceInfo) -> String {
-        let mappedDynamicContent = dynamicContentMapByTag[tag]
-        return mappedDynamicContent ?? ""
+        let dgc_mappedDynamicContent = dgc_dynamicContentMapByTag[tag]
+        return dgc_mappedDynamicContent ?? ""
     }
 
     func vapWrapView_loadVapImage(withURL resourceURLString: String, context _: [AnyHashable : Any], completion completionBlock: @escaping VAPImageCompletionBlock) {
-        if resourceURLString.isRealNetUrl, let imageURL = URL(string: resourceURLString) {
-            KingfisherManager.shared.retrieveImage(with: imageURL) { result in
+        if resourceURLString.isRealNetUrl, let dgc_imageURL = URL(string: resourceURLString) {
+            KingfisherManager.shared.retrieveImage(with: dgc_imageURL) { result in
                 switch result {
-                case .success(let retrievedImage):
+                case .success(let dgc_retrievedImage):
                     callMain {
-                        completionBlock(retrievedImage.image, nil, imageURL.absoluteString)
+                        completionBlock(dgc_retrievedImage.image, nil, dgc_imageURL.absoluteString)
                     }
-                case .failure(let downloadError):
+                case .failure(let dgc_downloadError):
                     callMain {
-                        completionBlock(nil, downloadError, imageURL.absoluteString)
+                        completionBlock(nil, dgc_downloadError, dgc_imageURL.absoluteString)
                     }
                 }
             }
         }else{
-            let bundledImage = UIImage(named: resourceURLString)
+            let dgc_bundledImage = UIImage(named: resourceURLString)
             DispatchQueue.main.async {
-                completionBlock(bundledImage, nil, "")
+                completionBlock(dgc_bundledImage, nil, "")
             }
         }
     }
@@ -102,53 +102,53 @@ extension DGCAnimationVapPlayer: VAPWrapViewDelegate{
 private class DGCAnimationVapPlayerView: QGVAPWrapView {
     
     /// 外部是否可以播放
-    private var shouldAllowPlayback = false
+    private var dgc_shouldAllowPlayback = false
     
     /// 是否真正播放
-    private var isPlaybackRunning = false
+    private var dgc_isPlaybackRunning = false
     
     /// 没有设置 frame时候 播不出来
-    private var isViewPreparedForPlayback = false
+    private var dgc_isViewPreparedForPlayback = false
     
-    private var pendingPlaybackFilePath = String()
-    private var pendingPlaybackRepeatCount: Int = -1
-    private weak var pendingPlaybackDelegate: (any VAPWrapViewDelegate)?
+    private var dgc_pendingPlaybackFilePath = String()
+    private var dgc_pendingPlaybackRepeatCount: Int = -1
+    private weak var dgc_pendingPlaybackDelegate: (any VAPWrapViewDelegate)?
     
     override func playHWDMP4(_ filePath: String, repeatCount: Int, delegate: any VAPWrapViewDelegate) {
-        shouldAllowPlayback = true
-        isPlaybackRunning = false
-        self.pendingPlaybackDelegate = delegate
-        self.pendingPlaybackFilePath = filePath
-        self.pendingPlaybackRepeatCount = repeatCount
-        if isViewPreparedForPlayback {
-            startPlaybackWhenPossible(filePath, repeatCount: repeatCount, delegate: delegate)
+        dgc_shouldAllowPlayback = true
+        dgc_isPlaybackRunning = false
+        self.dgc_pendingPlaybackDelegate = delegate
+        self.dgc_pendingPlaybackFilePath = filePath
+        self.dgc_pendingPlaybackRepeatCount = repeatCount
+        if dgc_isViewPreparedForPlayback {
+            dgc_startPlaybackWhenPossible(filePath, repeatCount: repeatCount, delegate: delegate)
         }
     }
     
     /// 停止播放
     override func stopHWDMP4() {
-        shouldAllowPlayback = false
-        isPlaybackRunning = false
+        dgc_shouldAllowPlayback = false
+        dgc_isPlaybackRunning = false
         super.stopHWDMP4()
     }
     
-    private func startPlaybackWhenPossible(_ filePath: String, repeatCount: Int, delegate: any VAPWrapViewDelegate) {
-        if shouldAllowPlayback == false { // 外部停止
+    private func dgc_startPlaybackWhenPossible(_ filePath: String, repeatCount: Int, delegate: any VAPWrapViewDelegate) {
+        if dgc_shouldAllowPlayback == false { // 外部停止
             return
         }
-        if isPlaybackRunning {
+        if dgc_isPlaybackRunning {
             return
         }
-        isPlaybackRunning = true
+        dgc_isPlaybackRunning = true
         super.playHWDMP4(filePath, repeatCount: repeatCount, delegate: delegate)
     }
     
     public override func layoutSubviews() {
         super.layoutSubviews()
         if self.bounds != .zero {
-            isViewPreparedForPlayback = true
-            if let playbackDelegate = self.pendingPlaybackDelegate {
-                startPlaybackWhenPossible(pendingPlaybackFilePath, repeatCount: pendingPlaybackRepeatCount, delegate: playbackDelegate)
+            dgc_isViewPreparedForPlayback = true
+            if let dgc_playbackDelegate = self.dgc_pendingPlaybackDelegate {
+                dgc_startPlaybackWhenPossible(dgc_pendingPlaybackFilePath, repeatCount: dgc_pendingPlaybackRepeatCount, delegate: dgc_playbackDelegate)
             }
         }
     }

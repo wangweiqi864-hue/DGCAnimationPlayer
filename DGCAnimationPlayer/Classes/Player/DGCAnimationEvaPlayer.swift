@@ -10,17 +10,17 @@ import YYEVA
 
 class DGCAnimationEvaPlayer: NSObject, DGCAnimationPlayerProtocol {
     
-    var containView: UIView { evaPlayerView }
+    var containView: UIView { dgc_evaPlayerView }
     
     var delegate: DGCAnimationPlayerDelegate?
     
     func stop() {
-        evaPlayerView.stopAnimation()
+        dgc_evaPlayerView.stopAnimation()
     }
 
     func play(url: String, config: DGCAnimationConfig?){
-        var resolvedRepeatCount = 1
-        if let playbackConfig = config {
+        var dgc_resolvedRepeatCount = 1
+        if let dgc_playbackConfig = config {
 //            param.keyData.forEach { item in
 //                if item.type == .text {
 //                    self.playerView.setImageUrl(item.data, forKey: item.key)
@@ -29,39 +29,39 @@ class DGCAnimationEvaPlayer: NSObject, DGCAnimationPlayerProtocol {
 //                }
 //            }
             //填充模式
-            applyContentFillMode(config: playbackConfig)
+            dgc_applyContentFillMode(config: dgc_playbackConfig)
             
-            resolvedRepeatCount = Int(playbackConfig.playCount)
-            if resolvedRepeatCount <= 0 {//设置无限大的值 表示无限循环
-                resolvedRepeatCount = 9999999
+            dgc_resolvedRepeatCount = Int(dgc_playbackConfig.playCount)
+            if dgc_resolvedRepeatCount <= 0 {//设置无限大的值 表示无限循环
+                dgc_resolvedRepeatCount = 9999999
             }
         }
         //开始播放
-        self.evaPlayerView.play(url, repeatCount: resolvedRepeatCount)
+        self.dgc_evaPlayerView.play(url, repeatCount: dgc_resolvedRepeatCount)
     }
 
-    private lazy var evaPlayerView: YYEVAPlayer = {
-        let evaPlayerInstance = YYEVAPlayer()
-        evaPlayerInstance.delegate = self
-        return evaPlayerInstance
+    private lazy var dgc_evaPlayerView: YYEVAPlayer = {
+        let dgc_evaPlayerInstance = YYEVAPlayer()
+        dgc_evaPlayerInstance.delegate = self
+        return dgc_evaPlayerInstance
     }()
 }
 
 extension DGCAnimationEvaPlayer {
     
-    private func applyContentFillMode(config playbackConfig: DGCAnimationConfig) {
+    private func dgc_applyContentFillMode(config playbackConfig: DGCAnimationConfig) {
         //填充模式
-        var resolvedFillMode: YYEVAFillMode = .contentMode_ScaleAspectFit
+        var dgc_resolvedFillMode: YYEVAFillMode = .contentMode_ScaleAspectFit
         switch playbackConfig.contentMode {
             case .scaleAspectFit:
-                resolvedFillMode = .contentMode_ScaleAspectFit
+                dgc_resolvedFillMode = .contentMode_ScaleAspectFit
             case .scaleAspectFill:
-                resolvedFillMode = .contentMode_ScaleAspectFill
+                dgc_resolvedFillMode = .contentMode_ScaleAspectFill
             case .scaleToFill:
-                resolvedFillMode = .contentMode_ScaleToFill
+                dgc_resolvedFillMode = .contentMode_ScaleToFill
             default:break
         }
-        evaPlayerView.mode = resolvedFillMode
+        dgc_evaPlayerView.mode = dgc_resolvedFillMode
     }
 }
 

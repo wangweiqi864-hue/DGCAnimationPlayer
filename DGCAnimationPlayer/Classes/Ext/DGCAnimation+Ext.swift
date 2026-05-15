@@ -19,9 +19,9 @@ extension String {
     }
     
     var md5: String {
-        let md5DigestBytes = Insecure.MD5.hash(data: data(using: .utf8) ?? Data())
+        let dgc_md5DigestBytes = Insecure.MD5.hash(data: data(using: .utf8) ?? Data())
 
-        return md5DigestBytes.map {
+        return dgc_md5DigestBytes.map {
             String(format: "%02hhx", $0)
         }.joined()
     }
@@ -29,21 +29,21 @@ extension String {
 
 extension UIImage {
     func cropImageToCircle() -> UIImage? {
-        let imageWidth = self.size.width
-        let imageHeight = self.size.height
-        if imageWidth <= 0 || imageHeight <= 0 { return nil }
-        let imageSize = min(imageWidth, imageHeight)
-        let circleRadius = imageSize / 2
+        let dgc_imageWidth = self.size.width
+        let dgc_imageHeight = self.size.height
+        if dgc_imageWidth <= 0 || dgc_imageHeight <= 0 { return nil }
+        let dgc_imageSize = min(dgc_imageWidth, dgc_imageHeight)
+        let dgc_circleRadius = dgc_imageSize / 2
         
-        let renderer = UIGraphicsImageRenderer(size: CGSize(width: imageSize, height: imageSize))
-        let renderedCircularImage = renderer.image { _ in
-            let circlePath = UIBezierPath(arcCenter: CGPoint(x: circleRadius, y: circleRadius), radius: circleRadius, startAngle: 0, endAngle: CGFloat.pi * 2, clockwise: true)
-            circlePath.addClip()
+        let dgc_renderer = UIGraphicsImageRenderer(size: CGSize(width: dgc_imageSize, height: dgc_imageSize))
+        let dgc_renderedCircularImage = dgc_renderer.image { _ in
+            let dgc_circlePath = UIBezierPath(arcCenter: CGPoint(x: dgc_circleRadius, y: dgc_circleRadius), radius: dgc_circleRadius, startAngle: 0, endAngle: CGFloat.pi * 2, clockwise: true)
+            dgc_circlePath.addClip()
             
-            self.draw(in: CGRect(x: (imageSize - imageWidth) / 2, y: (imageSize - imageHeight) / 2, width: imageWidth, height: imageHeight))
+            self.draw(in: CGRect(x: (dgc_imageSize - dgc_imageWidth) / 2, y: (dgc_imageSize - dgc_imageHeight) / 2, width: dgc_imageWidth, height: dgc_imageHeight))
         }
         
-        return renderedCircularImage
+        return dgc_renderedCircularImage
     }
 
 }

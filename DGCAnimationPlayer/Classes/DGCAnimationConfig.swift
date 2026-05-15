@@ -21,21 +21,21 @@ public enum DGCAnimationType: Int32 {
     
     
     static func animationType(forFileURL fileURL: String) -> DGCAnimationType {
-        guard let resourceExtension = fileURL.components(separatedBy: ".").last?.lowercased() else { return .UN }
-        if resourceExtension.hasSuffix("svga"){
+        guard let dgc_resourceExtension = fileURL.components(separatedBy: ".").last?.lowercased() else { return .UN }
+        if dgc_resourceExtension.hasSuffix("svga"){
             return .SVGA
         }
-        else if resourceExtension.hasSuffix("vap"){
+        else if dgc_resourceExtension.hasSuffix("vap"){
             return .VAP
-        }else if resourceExtension.hasSuffix("png") || resourceExtension.hasSuffix("jpeg") || resourceExtension.hasSuffix("jpg"){
+        }else if dgc_resourceExtension.hasSuffix("png") || dgc_resourceExtension.hasSuffix("jpeg") || dgc_resourceExtension.hasSuffix("jpg"){
             return .PNG
-        }else if resourceExtension.hasSuffix("eva") {
+        }else if dgc_resourceExtension.hasSuffix("eva") {
             return .EVA
-        }else if resourceExtension.hasSuffix("mp4") {
+        }else if dgc_resourceExtension.hasSuffix("mp4") {
             return .MP4
-        }else if resourceExtension.hasSuffix("gif"){
+        }else if dgc_resourceExtension.hasSuffix("gif"){
             return .GIF
-        }else if resourceExtension.hasSuffix("webp"){
+        }else if dgc_resourceExtension.hasSuffix("webp"){
             return .WebP
         }
         return .UN
@@ -80,55 +80,55 @@ public struct DGCAnimationConfig {
     
     // 转换动态元素
     public mutating func changeKeyDict(keyStr rawKeyJSONString: String, avatar avatarList: [String], content textList: [String]){
-        if let keyJSONData = rawKeyJSONString.data(using: .utf8) {
-            if let dynamicKeyMapping = try? JSONSerialization.jsonObject(with: keyJSONData) as? [String:String] {
-                self.keyData = buildDynamicKeyItems(from: dynamicKeyMapping, avatarList: avatarList, textList: textList)
+        if let dgc_keyJSONData = rawKeyJSONString.data(using: .utf8) {
+            if let dgc_dynamicKeyMapping = try? JSONSerialization.jsonObject(with: dgc_keyJSONData) as? [String:String] {
+                self.keyData = dgc_buildDynamicKeyItems(from: dgc_dynamicKeyMapping, avatarList: avatarList, textList: textList)
             }
         }
     }
     
-    private func buildDynamicKeyItems(from keyMapping: [String: String], avatarList: [String], textList: [String]) -> [DGCPlayerKeyItem] {
-        var generatedKeyItems: [DGCPlayerKeyItem] = []
-        keyMapping.forEach { fieldName, mappedKey in
-            if fieldName == "senderNameField"{
+    private func dgc_buildDynamicKeyItems(from keyMapping: [String: String], avatarList: [String], textList: [String]) -> [DGCPlayerKeyItem] {
+        var dgc_generatedKeyItems: [DGCPlayerKeyItem] = []
+        keyMapping.forEach { dgc_fieldName, dgc_mappedKey in
+            if dgc_fieldName == "senderNameField"{
                 if textList.count > 0{
-                    let senderNameText = textList[0]
-                    let generatedKeyItem = DGCPlayerKeyItem(key: mappedKey, data: senderNameText, type: .text)
-                    generatedKeyItems.append(generatedKeyItem)
+                    let dgc_senderNameText = textList[0]
+                    let dgc_generatedKeyItem = DGCPlayerKeyItem(key: dgc_mappedKey, data: dgc_senderNameText, type: .text)
+                    dgc_generatedKeyItems.append(dgc_generatedKeyItem)
                 }
-            }else if fieldName == "senderIconField"{
+            }else if dgc_fieldName == "senderIconField"{
                 if avatarList.count > 0{
-                    let senderAvatarPath = avatarList[0]
-                    let generatedKeyItem = DGCPlayerKeyItem(key: mappedKey, data: senderAvatarPath, type: .image)
-                    generatedKeyItems.append(generatedKeyItem)
+                    let dgc_senderAvatarPath = avatarList[0]
+                    let dgc_generatedKeyItem = DGCPlayerKeyItem(key: dgc_mappedKey, data: dgc_senderAvatarPath, type: .image)
+                    dgc_generatedKeyItems.append(dgc_generatedKeyItem)
                 }
-            }else if fieldName == "receiverNameField"{
+            }else if dgc_fieldName == "receiverNameField"{
                 if textList.count > 1{
-                    let receiverNameText = textList[1]
-                    let generatedKeyItem = DGCPlayerKeyItem(key: mappedKey, data: receiverNameText, type: .text)
-                    generatedKeyItems.append(generatedKeyItem)
+                    let dgc_receiverNameText = textList[1]
+                    let dgc_generatedKeyItem = DGCPlayerKeyItem(key: dgc_mappedKey, data: dgc_receiverNameText, type: .text)
+                    dgc_generatedKeyItems.append(dgc_generatedKeyItem)
                 }
-            }else if fieldName == "receiverIconField"{
+            }else if dgc_fieldName == "receiverIconField"{
                 if avatarList.count > 1{
-                    let receiverAvatarPath = avatarList[1]
-                    let generatedKeyItem = DGCPlayerKeyItem(key: mappedKey, data: receiverAvatarPath, type: .image)
-                    generatedKeyItems.append(generatedKeyItem)
+                    let dgc_receiverAvatarPath = avatarList[1]
+                    let dgc_generatedKeyItem = DGCPlayerKeyItem(key: dgc_mappedKey, data: dgc_receiverAvatarPath, type: .image)
+                    dgc_generatedKeyItems.append(dgc_generatedKeyItem)
                 }
-            }else if fieldName == "keyAvatar"{
+            }else if dgc_fieldName == "keyAvatar"{
                 if avatarList.count >= 1{
-                    let avatarPath = avatarList[0]
-                    let generatedKeyItem = DGCPlayerKeyItem(key: mappedKey, data: avatarPath, type: .image)
-                    generatedKeyItems.append(generatedKeyItem)
+                    let dgc_avatarPath = avatarList[0]
+                    let dgc_generatedKeyItem = DGCPlayerKeyItem(key: dgc_mappedKey, data: dgc_avatarPath, type: .image)
+                    dgc_generatedKeyItems.append(dgc_generatedKeyItem)
                 }
-            }else if fieldName == "keyNickname"{
+            }else if dgc_fieldName == "keyNickname"{
                 if textList.count >= 1{
-                    let nicknameText = textList[0]
-                    let generatedKeyItem = DGCPlayerKeyItem(key: mappedKey, data: nicknameText, type: .text)
-                    generatedKeyItems.append(generatedKeyItem)
+                    let dgc_nicknameText = textList[0]
+                    let dgc_generatedKeyItem = DGCPlayerKeyItem(key: dgc_mappedKey, data: dgc_nicknameText, type: .text)
+                    dgc_generatedKeyItems.append(dgc_generatedKeyItem)
                 }
             }
         }
-        return generatedKeyItems
+        return dgc_generatedKeyItems
     }
 
 }

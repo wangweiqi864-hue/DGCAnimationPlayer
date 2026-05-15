@@ -12,45 +12,45 @@ import Kingfisher
 
 class DGCAnimationSvgaPlayer: NSObject, DGCAnimationPlayerProtocol {
     
-    var containView: UIView { svgaPlayerView }
+    var containView: UIView { dgc_svgaPlayerView }
     weak var delegate: DGCAnimationPlayerDelegate?
     
-    private lazy var svgaPlayerView: SVGAPlayer = {
-        let svgaPlayer = SVGAPlayer()
-        svgaPlayer.delegate = self
-        svgaPlayer.clearsAfterStop = false //靠外部移除
-        svgaPlayer.contentMode = .scaleAspectFit
-        svgaPlayer.isUserInteractionEnabled = false
-        return svgaPlayer
+    private lazy var dgc_svgaPlayerView: SVGAPlayer = {
+        let dgc_svgaPlayer = SVGAPlayer()
+        dgc_svgaPlayer.delegate = self
+        dgc_svgaPlayer.clearsAfterStop = false //靠外部移除
+        dgc_svgaPlayer.contentMode = .scaleAspectFit
+        dgc_svgaPlayer.isUserInteractionEnabled = false
+        return dgc_svgaPlayer
     }()
     
     // 不用缓存
-    private lazy var svgaParser: SVGAParser = {
-        let parserInstance = SVGAParser()
-        parserInstance.enabledMemoryCache = false
-        return parserInstance
+    private lazy var dgc_svgaParser: SVGAParser = {
+        let dgc_parserInstance = SVGAParser()
+        dgc_parserInstance.enabledMemoryCache = false
+        return dgc_parserInstance
     }()
     
     func play(url: String, config: DGCAnimationConfig?) {
-        var animationResourceURL: URL?
+        var dgc_animationResourceURL: URL?
         if url.hasPrefix("file://") {
-            animationResourceURL = URL(string: url)
+            dgc_animationResourceURL = URL(string: url)
         } else if url.hasSuffix(".svga"){ // 说明的本地下载的文件
-            animationResourceURL = URL(fileURLWithPath: url)
+            dgc_animationResourceURL = URL(fileURLWithPath: url)
         } else { // 没有后缀说明是 Bundle里的文件
-            let bundleSVGAPath = Bundle.main.path(forResource: url, ofType: "svga") ?? ""
-            animationResourceURL = URL(fileURLWithPath: bundleSVGAPath)
+            let dgc_bundleSVGAPath = Bundle.main.path(forResource: url, ofType: "svga") ?? ""
+            dgc_animationResourceURL = URL(fileURLWithPath: dgc_bundleSVGAPath)
         }
-        guard let animationResourceURL = animationResourceURL else {
+        guard let dgc_animationResourceURL = dgc_animationResourceURL else {
             self.delegate?.playDidFinish()
             return
         }
                 
         DispatchQueue.global().async {[weak self] in
             autoreleasepool {
-                if let svgaBinaryData = try? Data(contentsOf: animationResourceURL) {
-                    self?.svgaParser.parse(with: svgaBinaryData, cacheKey: url) { [weak self] videoEntity in
-                        self?.configureVideoItemAndStartPlayback(video: videoEntity, config: config)
+                if let dgc_svgaBinaryData = try? Data(contentsOf: dgc_animationResourceURL) {
+                    self?.dgc_svgaParser.parse(with: dgc_svgaBinaryData, cacheKey: url) { [weak self] videoEntity in
+                        self?.dgc_configureVideoItemAndStartPlayback(video: videoEntity, config: config)
                     } failureBlock: { [weak self] _ in
                         self?.delegate?.playDidFinish()
                     }
@@ -65,8 +65,8 @@ class DGCAnimationSvgaPlayer: NSObject, DGCAnimationPlayerProtocol {
     }
     
     func stop() {
-        svgaPlayerView.stopAnimation()
-        svgaPlayerView.videoItem = nil
+        dgc_svgaPlayerView.stopAnimation()
+        dgc_svgaPlayerView.videoItem = nil
         self.delegate?.playDidFinish()
     }
 }
@@ -79,22 +79,22 @@ extension DGCAnimationSvgaPlayer: SVGAPlayerDelegate{
 
 extension DGCAnimationSvgaPlayer {
     
-    private func configureVideoItemAndStartPlayback(video: SVGAVideoEntity?, config playbackConfig: DGCAnimationConfig?) {
+    private func dgc_configureVideoItemAndStartPlayback(video: SVGAVideoEntity?, config playbackConfig: DGCAnimationConfig?) {
         
         //设置动态参数
         playbackConfig?.keyData.forEach { keyItem in
             if keyItem.type == .image{
                 if keyItem.data.isRealNetUrl {
-                    let imageURL = URL(string: keyItem.data)!
-                    _ = KingfisherManager.shared.retrieveImage(with: imageURL) { [weak self] result in
+                    let dgc_imageURL = URL(string: keyItem.data)!
+                    _ = KingfisherManager.shared.retrieveImage(with: dgc_imageURL) { [weak self] result in
                         switch result {
-                        case.success(let retrievedImage):
+                        case.success(let dgc_retrievedImage):
                             DispatchQueue.main.async {
-                                self?.svgaPlayerView.setImage(retrievedImage.image, forKey: keyItem.key)
+                                self?.dgc_svgaPlayerView.setImage(dgc_retrievedImage.image, forKey: keyItem.key)
                             }
 
-                        case.failure(let downloadError):
-                            print("下载图片失败: \(downloadError)")
+                        case.failure(let dgc_downloadError):
+                            print("下载图片失败: \(dgc_downloadError)")
                         }
                     }
                     
@@ -117,24 +117,24 @@ extension DGCAnimationSvgaPlayer {
 //                        }
 //                    }
                 }else{
-                    if keyItem.data.isEmpty , let fallbackImage = keyItem.otherData as? UIImage {
-                        self.svgaPlayerView.setImage(fallbackImage, forKey: keyItem.key)
+                    if keyItem.data.isEmpty , let dgc_fallbackImage = keyItem.otherData as? UIImage {
+                        self.dgc_svgaPlayerView.setImage(dgc_fallbackImage, forKey: keyItem.key)
                     }else{
-                        self.svgaPlayerView.setImage(UIImage(named: keyItem.data), forKey: keyItem.key)
+                        self.dgc_svgaPlayerView.setImage(UIImage(named: keyItem.data), forKey: keyItem.key)
                     }
                 }
             }else if keyItem.type == .text{
-                let dynamicAttributedText = NSMutableAttributedString(string: keyItem.data)
-                if let extraTextAttributes = keyItem.otherData as? [NSAttributedString.Key : Any] {
-                    dynamicAttributedText.addAttributes(extraTextAttributes, range: NSRange(location: 0, length: dynamicAttributedText.length))
+                let dgc_dynamicAttributedText = NSMutableAttributedString(string: keyItem.data)
+                if let dgc_extraTextAttributes = keyItem.otherData as? [NSAttributedString.Key : Any] {
+                    dgc_dynamicAttributedText.addAttributes(dgc_extraTextAttributes, range: NSRange(location: 0, length: dgc_dynamicAttributedText.length))
                 }
-                svgaPlayerView.setAttributedText(dynamicAttributedText, forKey: keyItem.key)
+                dgc_svgaPlayerView.setAttributedText(dgc_dynamicAttributedText, forKey: keyItem.key)
             }
         }
         
-        svgaPlayerView.contentMode = playbackConfig?.contentMode ?? .scaleAspectFit
-        self.svgaPlayerView.videoItem = video
-        svgaPlayerView.loops = playbackConfig?.playCount ?? 0 // 默认无限播放
-        self.svgaPlayerView.startAnimation()
+        dgc_svgaPlayerView.contentMode = playbackConfig?.contentMode ?? .scaleAspectFit
+        self.dgc_svgaPlayerView.videoItem = video
+        dgc_svgaPlayerView.loops = playbackConfig?.playCount ?? 0 // 默认无限播放
+        self.dgc_svgaPlayerView.startAnimation()
     }
 }

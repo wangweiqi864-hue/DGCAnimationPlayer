@@ -19,11 +19,11 @@ public class DGCAnimationPlayer: UIView {
     public var completedBlock: (() -> Void)?
     
     /// 播放器
-    private var playerInstance: DGCAnimationPlayerProtocol?
+    private var dgc_playerInstance: DGCAnimationPlayerProtocol?
     /// 当前播放的url
-    private var currentPlaybackURL: String?
-    private var currentPlaybackType: DGCAnimationType = .UN
-    private var currentPlaybackConfig: DGCAnimationConfig?
+    private var dgc_currentPlaybackURL: String?
+    private var dgc_currentPlaybackType: DGCAnimationType = .UN
+    private var dgc_currentPlaybackConfig: DGCAnimationConfig?
     
     /// 播放
     public func play(url: String, animationType preferredType: DGCAnimationType = .UN, config playConfig: DGCAnimationConfig = DGCAnimationConfig()) {
@@ -34,16 +34,16 @@ public class DGCAnimationPlayer: UIView {
             return
         }
         
-        self.currentPlaybackConfig = playConfig
+        self.dgc_currentPlaybackConfig = playConfig
         
         // 同一个文件 且 无限循环播放 且 完成后不移除
-        if url == currentPlaybackURL && playConfig.isRemoveFinish == false && playConfig.playCount == 0 {
-            playerInstance?.containView.transform = playConfig.isFlip ? CGAffineTransform(scaleX: -1, y: 1) : .identity
+        if url == dgc_currentPlaybackURL && playConfig.isRemoveFinish == false && playConfig.playCount == 0 {
+            dgc_playerInstance?.containView.transform = playConfig.isFlip ? CGAffineTransform(scaleX: -1, y: 1) : .identity
             return;
         }
         // 判断文件是否需要下载
         if url.isRealNetUrl {
-            currentPlaybackURL = url
+            dgc_currentPlaybackURL = url
             // 网络文件
             APLog("net-file----url=\(url)")
 //            downloadAnimationAsset(url: url) { [weak self] isDownloadSucceeded, localFilePath in
@@ -57,7 +57,7 @@ public class DGCAnimationPlayer: UIView {
                 
             } completion: {[weak self] result in
                 if result.code == 0{
-                    self?.playDownloadedNetworkAnimation(with: result, config: playConfig)
+                    self?.dgc_playDownloadedNetworkAnimation(with: result, config: playConfig)
                 }else{//下载失败
                     self?.playDidFinish()
                 }
@@ -65,27 +65,27 @@ public class DGCAnimationPlayer: UIView {
         } else {
             // 本地文件如果有传文件类型则有限使用没有则自动解析
             APLog("localFile------url=\(url)")
-            var targetPlaybackType = preferredType
+            var dgc_targetPlaybackType = preferredType
             // 解析类型
-            if targetPlaybackType == .UN {
-                targetPlaybackType = DGCAnimationType.animationType(forFileURL: url)
+            if dgc_targetPlaybackType == .UN {
+                dgc_targetPlaybackType = DGCAnimationType.animationType(forFileURL: url)
             }
             
-            if targetPlaybackType == .UN { //解析后还是未知类型 结束
+            if dgc_targetPlaybackType == .UN { //解析后还是未知类型 结束
                 APLog("------localFile----解析---后---异常")
                 self.playDidFinish()
                 return
             }
             // 开始播放
-            currentPlaybackURL = url
-            self.playLocalAnimationFile(filePath: url, resolvedType: targetPlaybackType, config: playConfig)
+            dgc_currentPlaybackURL = url
+            self.dgc_playLocalAnimationFile(filePath: url, resolvedType: dgc_targetPlaybackType, config: playConfig)
         }
     }
     
     /// 停止
     public func stop() {
-        currentPlaybackURL = nil
-        playerInstance?.stop()
+        dgc_currentPlaybackURL = nil
+        dgc_playerInstance?.stop()
     }
     
     // 预下载播放文件 用来播放前提前下载
@@ -96,7 +96,7 @@ public class DGCAnimationPlayer: UIView {
     }
     
     deinit {
-        self.playerInstance?.delegate = nil
+        self.dgc_playerInstance?.delegate = nil
     }
     
     public override init(frame: CGRect) {
@@ -110,16 +110,16 @@ public class DGCAnimationPlayer: UIView {
     
     public override func layoutSubviews() {
         super.layoutSubviews()
-        playerInstance?.containView.frame = self.bounds
+        dgc_playerInstance?.containView.frame = self.bounds
     }
 }
 
 extension DGCAnimationPlayer {
-    private func downloadAnimationAsset(url: String, completion: ((Bool, String)->Void)? = nil) {
-        let resourceExtension = url.split(separator: ".").last ?? ""
-        let generatedFileName = url.md5 + "." + resourceExtension
-        let targetSavePath =  MGFileUtils.share.getFileFullPath(fileName: generatedFileName, type: .animation)
-        MGDownloadHelper.share.download(url: url, savePath: targetSavePath) { _ in
+    private func dgc_downloadAnimationAsset(url: String, completion: ((Bool, String)->Void)? = nil) {
+        let dgc_resourceExtension = url.split(separator: ".").last ?? ""
+        let dgc_generatedFileName = url.md5 + "." + dgc_resourceExtension
+        let dgc_targetSavePath =  MGFileUtils.share.getFileFullPath(fileName: dgc_generatedFileName, type: .animation)
+        MGDownloadHelper.share.download(url: url, savePath: dgc_targetSavePath) { _ in
             
         } completed: { filePath in
             completion?(true, filePath)
@@ -132,115 +132,115 @@ extension DGCAnimationPlayer {
 
 extension DGCAnimationPlayer {
     
-    private func playDownloadedNetworkAnimation(with result: DGCDownloadResult, config: DGCAnimationConfig? = nil) {
-        let targetPlaybackType = DGCAnimationType(rawValue: result.fType) ?? .UN
+    private func dgc_playDownloadedNetworkAnimation(with result: DGCDownloadResult, config: DGCAnimationConfig? = nil) {
+        let dgc_targetPlaybackType = DGCAnimationType(rawValue: result.fType) ?? .UN
         //播放之前的处理
-        if preparePlaybackEnvironment(targetType: targetPlaybackType) == false{
+        if dgc_preparePlaybackEnvironment(targetType: dgc_targetPlaybackType) == false{
             return
         }
         // vap播放器一定要先设置大小 不然播放不了
         // 可以不用设置了 在vap内部优化了
-        playerInstance?.containView.frame = self.bounds
+        dgc_playerInstance?.containView.frame = self.bounds
         //开始播放
-        playerInstance?.play(url: result.filePath, config: config)
+        dgc_playerInstance?.play(url: result.filePath, config: config)
     }
     
-    private func playNetworkAnimationFile(filePath: String, config: DGCAnimationConfig? = nil) {
-        let targetPlaybackType = DGCAnimationType.animationType(forFileURL: filePath)
+    private func dgc_playNetworkAnimationFile(filePath: String, config: DGCAnimationConfig? = nil) {
+        let dgc_targetPlaybackType = DGCAnimationType.animationType(forFileURL: filePath)
         //播放之前的处理
-        if preparePlaybackEnvironment(targetType: targetPlaybackType) == false{
+        if dgc_preparePlaybackEnvironment(targetType: dgc_targetPlaybackType) == false{
             return
         }
         // vap播放器一定要先设置大小 不然播放不了
         // 可以不用设置了 在vap内部优化了
-        playerInstance?.containView.frame = self.bounds
+        dgc_playerInstance?.containView.frame = self.bounds
         //开始播放
-        playerInstance?.play(url: filePath, config: config)
+        dgc_playerInstance?.play(url: filePath, config: config)
     }
     
-    private func playLocalAnimationFile(filePath: String, resolvedType: DGCAnimationType, config: DGCAnimationConfig? = nil) {
+    private func dgc_playLocalAnimationFile(filePath: String, resolvedType: DGCAnimationType, config: DGCAnimationConfig? = nil) {
         //播放之前的处理
-        if preparePlaybackEnvironment(targetType: resolvedType) == false{
+        if dgc_preparePlaybackEnvironment(targetType: resolvedType) == false{
             return
         }
         // vap播放器一定要先设置大小 不然播放不了
         // 可以不用设置了 在vap内部优化了
-        playerInstance?.containView.frame = self.bounds
+        dgc_playerInstance?.containView.frame = self.bounds
         //开始播放
-        playerInstance?.play(url: filePath, config: config)
+        dgc_playerInstance?.play(url: filePath, config: config)
         // 是否需要反转
-        if let playbackConfig = config {
-            playerInstance?.containView.transform = playbackConfig.isFlip ? CGAffineTransform(scaleX: -1, y: 1) : .identity
+        if let dgc_playbackConfig = config {
+            dgc_playerInstance?.containView.transform = dgc_playbackConfig.isFlip ? CGAffineTransform(scaleX: -1, y: 1) : .identity
         }
     }
     
     // 播放之前
-    private func preparePlaybackEnvironment(targetType: DGCAnimationType) -> Bool {
+    private func dgc_preparePlaybackEnvironment(targetType: DGCAnimationType) -> Bool {
         if targetType == .UN {
             APLog("file-type--un----play-end")
             self.playDidFinish()
             return false
         }
         // 先判断是否需要卸载
-        if currentPlaybackType != targetType {
-            self.playerInstance?.containView.removeFromSuperview()
-            self.playerInstance?.delegate = nil
-            self.playerInstance = nil
+        if dgc_currentPlaybackType != targetType {
+            self.dgc_playerInstance?.containView.removeFromSuperview()
+            self.dgc_playerInstance?.delegate = nil
+            self.dgc_playerInstance = nil
         }
         // 开始创建播放器
-        currentPlaybackType = targetType
-        if playerInstance == nil && createPlayerForCurrentType() == false{//重新安装 安装失败
-            currentPlaybackType = .UN
+        dgc_currentPlaybackType = targetType
+        if dgc_playerInstance == nil && dgc_createPlayerForCurrentType() == false{//重新安装 安装失败
+            dgc_currentPlaybackType = .UN
             self.playDidFinish()
             return false
         }
         // 注册静音可以播放
-        ensureAudioSessionForVapPlayback()
+        dgc_ensureAudioSessionForVapPlayback()
         // 添加视图
-        if let currentPlayerInstance = self.playerInstance {
-            if currentPlayerInstance.containView.superview == nil{
+        if let dgc_currentPlayerInstance = self.dgc_playerInstance {
+            if dgc_currentPlayerInstance.containView.superview == nil{
                 //将播放视图加入到 父视图中
-                self.addSubview(currentPlayerInstance.containView)
+                self.addSubview(dgc_currentPlayerInstance.containView)
                 self.setNeedsLayout()
             }
         }
         return true
     }
     
-    private func ensureAudioSessionForVapPlayback() {
-        if currentPlaybackType == .VAP {
+    private func dgc_ensureAudioSessionForVapPlayback() {
+        if dgc_currentPlaybackType == .VAP {
             // 设置播放会话 不用设置了
             do {
-                let audioSession = AVAudioSession.sharedInstance()
-                let currentCategory = audioSession.category
-                APLog("AVAudioSession---current--category-\(currentCategory)")
-                if currentCategory != .playback && currentCategory != .playAndRecord{
+                let dgc_audioSession = AVAudioSession.sharedInstance()
+                let dgc_currentCategory = dgc_audioSession.category
+                APLog("AVAudioSession---current--category-\(dgc_currentCategory)")
+                if dgc_currentCategory != .playback && dgc_currentCategory != .playAndRecord{
                     APLog("AVAudioSession---静音--")
-                    try audioSession.setCategory(.playback)
+                    try dgc_audioSession.setCategory(.playback)
                 }else{
-                    APLog("AVAudioSession--静音play---category-\(currentCategory)")
+                    APLog("AVAudioSession--静音play---category-\(dgc_currentCategory)")
                 }
-            } catch let sessionError {
-                APLog("AVAudioSession-----fail--error-\(sessionError)")
+            } catch let dgc_sessionError {
+                APLog("AVAudioSession-----fail--error-\(dgc_sessionError)")
             }
         }
     }
     
-    private func createPlayerForCurrentType() -> Bool {
-        var createdPlayer: DGCAnimationPlayerProtocol?
-        switch currentPlaybackType {
-        case .VAP:createdPlayer = DGCAnimationVapPlayer()
-        case .SVGA:createdPlayer = DGCAnimationSvgaPlayer()
-        case .PNG:createdPlayer = DGCAnimationPngPlayer()
-        case .EVA:createdPlayer = DGCAnimationEvaPlayer()
-        case .MP4:createdPlayer = DGCAnimationMp4Player()
+    private func dgc_createPlayerForCurrentType() -> Bool {
+        var dgc_createdPlayer: DGCAnimationPlayerProtocol?
+        switch dgc_currentPlaybackType {
+        case .VAP:dgc_createdPlayer = DGCAnimationVapPlayer()
+        case .SVGA:dgc_createdPlayer = DGCAnimationSvgaPlayer()
+        case .PNG:dgc_createdPlayer = DGCAnimationPngPlayer()
+        case .EVA:dgc_createdPlayer = DGCAnimationEvaPlayer()
+        case .MP4:dgc_createdPlayer = DGCAnimationMp4Player()
         default:
             APLog("file-type--un----play-end")
             self.playDidFinish()
             return false
         }
-        createdPlayer?.delegate = self
-        self.playerInstance = createdPlayer
+        dgc_createdPlayer?.delegate = self
+        self.dgc_playerInstance = dgc_createdPlayer
         return true
     }
 }
@@ -250,19 +250,19 @@ extension DGCAnimationPlayer: DGCAnimationPlayerDelegate {
     /// 播放完成
     func playDidFinish() {
         callMain {
-            self.playerInstance?.delegate = nil
+            self.dgc_playerInstance?.delegate = nil
             self.completedBlock?()
             self.completedBlock = nil
-            if self.currentPlaybackConfig?.isSaveLastFrame == true{// 这里是保存
+            if self.dgc_currentPlaybackConfig?.isSaveLastFrame == true{// 这里是保存
                 
             }else{
-                self.playerInstance?.containView.removeFromSuperview()
+                self.dgc_playerInstance?.containView.removeFromSuperview()
             }
-            if self.currentPlaybackConfig?.isRemoveFinish == true { // 播放完成是否需要移除视图
-                self.playerInstance?.containView.removeFromSuperview()
+            if self.dgc_currentPlaybackConfig?.isRemoveFinish == true { // 播放完成是否需要移除视图
+                self.dgc_playerInstance?.containView.removeFromSuperview()
                 self.removeFromSuperview()
             }
-            self.playerInstance = nil
+            self.dgc_playerInstance = nil
         }
     }
 }
