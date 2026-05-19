@@ -9,8 +9,8 @@ import Foundation
 import UIKit
 import AVFAudio
 
-import MGNetWork
-import MGFileHandle
+import DGCNetWork
+import DGCFileHandle
  
 // 动画播放器
 public class DGCAnimationPlayer: UIView {

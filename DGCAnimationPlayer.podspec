@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'DGCAnimationPlayer'
-  s.version          = '0.1.0'
+  s.version          = '0.1.1'
   s.summary          = 'A short description of DGCAnimationPlayer.'
 
 # This description is used to generate tags and improve search results.
@@ -53,11 +53,11 @@ TODO: Add long description of the pod here.
   # s.public_header_files = 'Pod/Classes/**/*.h'
   # s.frameworks = 'UIKit', 'MapKit'
   s.dependency 'SVGAPlayer' # SVGAPlayer是本地库 需要在Podfile 先导入
-  s.dependency 'MGNetWork' # MGNetwork是本地库 需要在Podfile 先导入
+  s.dependency 'DGCNetWork' # DGCNetWork是本地库 需要在Podfile 先导入
   s.dependency 'DGCLog' # YYEVA是本地库 需要在Podfile 先导入
   s.dependency 'Kingfisher', '~> 7.11.0'
   s.frameworks = 'AVFAudio'
-  s.dependency 'MGFileHandle'
+  s.dependency 'DGCFileHandle'
   s.dependency 'YYEVA', '~>1.1.32'
   s.dependency 'ZFPlayer'
   s.dependency 'ZFPlayer/AVPlayer'
