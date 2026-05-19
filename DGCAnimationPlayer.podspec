@@ -54,7 +54,7 @@ TODO: Add long description of the pod here.
   # s.frameworks = 'UIKit', 'MapKit'
   s.dependency 'SVGAPlayer' # SVGAPlayer是本地库 需要在Podfile 先导入
   s.dependency 'MGNetWork' # MGNetwork是本地库 需要在Podfile 先导入
-  s.dependency 'MGLog' # YYEVA是本地库 需要在Podfile 先导入
+  s.dependency 'DGCLog' # YYEVA是本地库 需要在Podfile 先导入
   s.dependency 'Kingfisher', '~> 7.11.0'
   s.frameworks = 'AVFAudio'
   s.dependency 'MGFileHandle'

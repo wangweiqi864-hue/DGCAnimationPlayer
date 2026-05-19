@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import MGLog
+import DGCLog
 import CryptoKit
 
 extension String {
@@ -49,5 +49,5 @@ extension UIImage {
 }
 
 func APLog<T>(_ message: T) {
-    MGLog.debug("[DGCAnimationPlayer]----\(message)")
+    DGCLog.debug("[DGCAnimationPlayer]----\(message)")
 }
